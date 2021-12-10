@@ -1,980 +1,506 @@
-# Ngx Schema Form [![Build Status](https://github.com/guillotinaweb/ngx-schema-form/workflows/CI/badge.svg)](https://github.com/guillotinaweb/ngx-schema-form/actions?query=workflow%3ACI)
+# AJSF (Angular JSON Schema Form)
 
-Ngx Schema Form is an Angular 2+ module allowing you to instanciate an HTML form from a [JSON schema](http://json-schema.org/).
+**N.B:** For Angular6-json-schema-form please check [this documentation](https://github.com/hamzahamidi/ajsf/tree/angular6-json-schema-form).
 
-Note: Version 1.x is compliant with Angular <=4, version 2.x is compliant with Angular >=6.
+<p align="center">
+  <a href="https://github.com/hamzahamidi/ajsf/actions?query=workflow%3ACI+branch%3Amain"><img src="https://github.com/hamzahamidi/ajsf/workflows/CI/badge.svg" alt="CI Status"></a>
+  <a href="https://www.npmjs.com/package/@ajsf/core"><img src="https://img.shields.io/npm/dm/@ajsf/core.svg?style=plastic" alt="npm number of downloads"></a>
+  <a href="https://github.com/hamzahamidi/ajsf/blob/master/LICENSE"><img src="https://img.shields.io/github/license/hamzahamidi/ajsf.svg?style=social" alt="LICENSE IMT"></a>
+  <a href="https://app.netlify.com/sites/ajsf/deploys"><img src="https://api.netlify.com/api/v1/badges/6c5b5a1d-db7c-4d0e-8ac1-a4840d8812f0/deploy-status" alt="Netlify Status"></a>
+</p>
 
-## DISCLAIMER
+Note: This project is a continuation to [dschnelldavis/Angular2-json-schema-form](https://github.com/dschnelldavis/angular2-json-schema-form) and is not affiliated with any organization.
 
-Ngx Schema Form is **not** related to [angular-schema-form](https://github.com/json-schema-form/angular-schema-form) and [schemaform.io](http://schemaform.io/).
+A [JSON Schema](http://json-schema.org) Form builder for Angular, similar to, and mostly API compatible with:
 
-We think `angular-schema-form` is a great Angular 1 library, and when it will move to Angular 2+, we will probably join our efforts to produce and maintain a unique Angular 2+ solution.
+* [JSON Schema Form](https://github.com/json-schema-form)'s [Angular Schema Form](http://schemaform.io) for [AngularJS](https://angularjs.org) ([examples](http://schemaform.io/examples/bootstrap-example.html))
+* [Mozilla](https://blog.mozilla.org/services/)'s [React JSON Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for [React](https://facebook.github.io/react/) ([examples](https://mozilla-services.github.io/react-jsonschema-form/)), and
+* [Joshfire](http://www.joshfire.com)'s [JSON Form](http://github.com/joshfire/jsonform/wiki) for [jQuery](https://jquery.com) ([examples](http://ulion.github.io/jsonform/playground/))
 
-## Demo
+## Packages
 
-[Demo](https://guillotinaweb.github.io/ngx-schema-form/)
+* [`@ajsf/core`](./README.md) [![npm version](https://badge.fury.io/js/%40ajsf%2Fcore.svg)](https://badge.fury.io/js/%40ajsf%2Fcore)
+* [`@ajsf/bootstrap3`](./projects/ajsf-bootstrap3/README.md) [![npm version](https://badge.fury.io/js/%40ajsf%2Fbootstrap3.svg)](https://badge.fury.io/js/%40ajsf%2Fbootstrap3)
+* [`@ajsf/bootstrap4`](./projects/ajsf-bootstrap4/README.md) [![npm version](https://badge.fury.io/js/%40ajsf%2Fbootstrap4.svg)](https://badge.fury.io/js/%40ajsf%2Fbootstrap4)
+* [`@ajsf/material`](./projects/ajsf-material/README.md) [![npm version](https://badge.fury.io/js/%40ajsf%2Fmaterial.svg)](https://badge.fury.io/js/%40ajsf%2Fmaterial)
 
-## Features
+## Check out the live demo and play with the examples
 
-- Generate a form from a single json schema object
-- Generate a form from a default set of html constructs
-- Allow initialization from previous values
-- Validation handled by z-schema
-- Allow injection of custom validators
-- Allow declaration of custom widgets
-- Allow injection of custom bindings (new!)
+[Check out some examples here.](https://hamidihamza.com/ajsf)
+
+This example playground features over 70 different JSON Schemas for you to try (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted with Material Design, Bootstrap 3, Bootstrap 4, or without any formatting.
 
 ## Installation
 
-To use Ngx Schema Form in your project simply execute the following command:
+### To install from NPM/YARN and use in your own project
 
-```bash
-npm install ngx-schema-form --save
+If you want to try out the libraries, you can for example [install @ajsf/material package from NPM](https://www.npmjs.com/package/@ajsf/material) which uses `material-angular` UI. You can use either [NPM](https://www.npmjs.com) or [Yarn](https://yarnpkg.com). To install with NPM, run the following from your terminal:
+
+```shell
+npm install @ajsf/material@latest
 ```
 
-You just have to check that all the peer-dependencies of this module are satisfied in your package.json.
+With YARN, run the following:
 
-##### JSON Schema
-
-With the installation there comes a JSON-Schema file that declares all specific or additional
-properties supported by _ngx-schema-form_.
-
-When using `*.json` files you may declare it with the `$schema` property to let your IDE's autocompletion help you create a schema-form.
-
-```bash
-{
-  "$schema": "./node_modules/ngx-schema-form/ngx-schema-form-schema.json",
-  "title": "My awesome schema-form"
-  ...
-}
-
+```shell
+yarn add @ajsf/material@latest
 ```
 
-## Getting started
+Then import `MaterialDesignFrameworkModule` in your main application module like this:
 
-Here our goal will be to create a simple login form.
-Let's start by creating a simple AppComponent taking a simple JSON schema as input.
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
 
-```js
-// app.component.ts
+import { MaterialDesignFrameworkModule } from '@ajsf/material';
 
-import { Component } from "@angular/core";
-
-@Component({
-  selector: "minimal-app",
-  // Bind the "mySchema" member to the schema input of the Form component.
-  template: '<sf-form [schema]="mySchema"></sf-form>',
-})
-export class AppComponent {
-  // The schema that will be used to generate a form
-  mySchema = {
-    properties: {
-      email: {
-        type: "string",
-        description: "email",
-        format: "email",
-      },
-      password: {
-        type: "string",
-        description: "Password",
-      },
-      rememberMe: {
-        type: "boolean",
-        default: false,
-        description: "Remember me",
-      },
-    },
-    required: ["email", "password", "rememberMe"],
-  };
-}
-```
-
-Create a module which import the AppComponent and configure Ngx schema form.
-
-```js
-//app.module.ts
-
-import { NgModule } from "@angular/core";
-import { BrowserModule } from "@angular/platform-browser";
-import {
-  SchemaFormModule,
-  WidgetRegistry,
-  DefaultWidgetRegistry,
-} from "ngx-schema-form";
-import { AppComponent } from "./app.component";
+import { AppComponent } from './app.component';
 
 @NgModule({
-  imports: [SchemaFormModule.forRoot(), BrowserModule],
-  declarations: [AppComponent],
-  providers: [{ provide: WidgetRegistry, useClass: DefaultWidgetRegistry }],
-})
-export class AppModule {}
-```
-
-The code above creates a form with three required fields.
-The validation state of each field is reflected by the class of each of them which can be either "has-error" or "has-success".
-Validation is done everytime a field's value changes.
-Basic validation is made by testing the value of the field against its corresponding schema.
-The input schema support almost all the features listed on the [JSON schema specification](http://json-schema.org/).
-
-### Accessing the form's value
-
-#### Input binding
-
-It is possible to provide initial values to the form.
-You can set the initial form's value through the `model` input:
-
-```js
-@Component({
-template: '<sf-form [schema]="mySchema" [model]="myModel"></sf-form>'
-})
-export class AppComponent {
-  mySchema = {...};
-  myModel = {email:" john.doe@example.com"};
-}
-```
-
-#### Output binding
-
-The Form component provides the `onChange` output binding of which value represents the value of the form.
-For instance, you can display the current forms's value with the following template:
-
-```js
-template: '<sf-form [schema]="mySchema" (onChange)="value=$event.value"></sf-form>{{value | json}}';
-```
-
-The `model` property allow two-way data binding:
-
-```
-<sf-form [schema]="mySchema" [(model)]="value"></sf-form>{{value | json}}
-```
-
-### Widgets
-
-Each field can be displayed using a specific widget.
-To declare the widget you want to use, add its `id` to the field's definition:
-
-```js
-mySchema = {
-  properties: {
-    email: {
-      type: "string",
-      description: "email",
-      format: "email",
-    },
-    password: {
-      type: "string",
-      description: "Password",
-      widget: "password", // == "widget": {"id": "password"}
-    },
-    rememberMe: {
-      type: "boolean",
-      default: false,
-      description: "Remember me",
-    },
-  },
-};
-```
-
-If there is no widget declared in a given property's schema, its type is used as widget id and the [default registry](#default-widgets-registry) gives a default widget (see details below).
-For instance, a string property will use the "string" widget.
-The following JSON schema is equivalent with the above example:
-
-```js
-mySchema = {
-  properties: {
-    email: {
-      type: "string",
-      description: "email",
-      format: "email",
-      widget: "string",
-    },
-    password: {
-      type: "string",
-      description: "Password",
-      widget: "password", // == "widget": {"id": "password"}
-    },
-    rememberMe: {
-      type: "boolean",
-      default: false,
-      description: "Remember me",
-      widget: "boolean",
-    },
-  },
-};
-```
-
-Some widgets accept parameters as input, in such cases, it is possible to provide them in the schema directly within the `widget` property (here the [TinyMCE widget](https://github.com/fbessou/ng2sf-tinymce) ):
-
-```js
-mySchema = {
-  properties: {
-    pageContent: {
-      type: "string",
-      description: "Page content",
-      widget: {
-        id: "richtext",
-        plugins: "textcolor colorpicker",
-        toolbar: "forecolor backcolor",
-      },
-    },
-  },
-};
-```
-
-### Default widget's registry
-
-Available widgets are managed through a `WidgetRegistry`.
-The default registry ([`DefaultWidgetRegistry`](./projects/schema-form/src/lib/defaultwidgets/defaultwidgetregistry.ts)) contains many widgets listed below, ordered by type:
-
-- **string**: string, search, tel, url, email, password, color, date, date-time, time, textarea, select, file, radio, richtext
-- **number**: number, integer, range
-- **integer**: integer, range
-- **boolean**: boolean, checkbox
-
-Note that the select and radio widgets rely on the `oneOf` property:
-
-```javascript
-"operatingSystem": {
-  "type": "string",
-  "oneOf": [
-    {
-      "enum": [
-        "linux"
-      ],
-      "description": "GNU/Linux"
-    },
-    {
-      "enum": [
-        "osx"
-      ],
-      "description": "OSX"
-    },
-    {
-      "enum": [
-        "windows"
-      ],
-      "description": "Windows"
-    },
-    {
-      "enum": [
-        "other"
-      ],
-      "description": "Other"
-    }
-  ],
-  "default": "other"
-}
-```
-
-### Actions and buttons
-
-Each schema can be extended by adding buttons after its widget.
-
-```js
-// app.component.ts
-@Component({
-  selector: "minimal-app",
-  // Bind the actions map to the the "actions" input
-  template: '<sf-form [schema]="mySchema" [actions]="myActions"></sf-form>',
-})
-export class AppComponent {
-  // The schema that will be used to generate a form
-  mySchema = {
-    properties: {
-      email: {
-        type: "string",
-        description: "email",
-        format: "email",
-      },
-      password: {
-        type: "string",
-        description: "Password",
-        buttons: [
-          {
-            id: "reset",
-            label: "Reset",
-          },
-        ],
-      },
-      rememberMe: {
-        type: "boolean",
-        default: false,
-        description: "Remember me",
-      },
-    },
-    required: ["email", "password", "rememberMe"],
-    buttons: [
-      {
-        id: "alert", // the id of the action callback
-        label: "Alert !", // the text inside the button
-      },
-    ],
-  };
-
-  // Declare a mapping between action ids and their event listener
-  myActions = {
-    alert: (property) => {
-      alert(JSON.stringify(property.value));
-    },
-    reset: (property) => {
-      property.reset();
-    },
-  };
-}
-```
-
-#### Render buttons
-
-You may define you own widget to create buttons by
-overriding the default widget for action buttons
-or create completely customized button widgets.
-
-##### Override
-
-Override the default action button widget
-in your `WidgetRegistry` implementation
-and register your own button widget.
-
-```js
-this.register("button", MyButtonWidgetComponent);
-```
-
-##### Custom
-
-Define a custom button widget by
-setting the property `button.widget` in the schema
-
-```json
-  "password": {
-    "type": "string",
-    "description": "Password",
-    "buttons": [
-      {
-        "id": "reset",
-        "label": "Reset"
-      },
-      {
-        "id": "custom_b",
-        "label": "My custom button",
-        "widget": "my_custom_button" // custom widget name for this button
-      }
-    ]
-  }
-```
-
-and then register it in your `WidgetRegistry` implementation
-
-```js
-this.register("my_custom_button", MyCustomButtonWidgetComponent);
-```
-
-##### Binding
-
-The button widget will get provided the `button` object form the schema
-including the `button.action` from the action registry
-and the `formProperty` object.
-
-To be fully AOT compatible
-the custom button widget may then extend `ButtonWidget` or
-provide the properties `button` and `formProperty` by it self.
-
-```js
-import { Component } from "@angular/core";
-import { ButtonWidget } from "ngx-schema-form/dist/defaultwidgets";
-
-@Component({
-  selector: "sf-button-widget",
-  templateUrl: "custom-button.widget.html",
-})
-export class CustomWidgetComponent extends ButtonWidget {}
-```
-
-```js
-  @Component({
-    selector: 'sf-button-widget',
-    templateUrl: 'custom-button.widget.html'
-  })
-  export class CustomWidgetComponent {
-    public button
-    public formProperty
-  }
-```
-
-### Advanced validation
-
-JSON schema provides validation against a static schema but its often necessary to provide other validation rules.
-The Form component accepts a `validators` input bound to a map between a field id and a validation function.
-The validation function takes three arguments: the value of the field, the property corresponding to it and the form object.
-
-In the following example we create a simple registration form.
-The user have to enter his password twice.
-To perform this check we create a custom validator:
-
-```js
-@Component({
-  selector: "minimal-app",
-  // Bind the validator map to the the "validators" input
-  template:
-    '<sf-form [schema]="mySchema" [validators]="myValidators"></sf-form>',
-})
-export class AppComponent {
-  mySchema = {
-    properties: {
-      email: {
-        type: "string",
-        description: "email",
-        format: "email",
-      },
-      password: {
-        type: "string",
-        description: "Password",
-      },
-      passwordCheck: {
-        type: "string",
-        description: "Password (verification)",
-      },
-    },
-    required: ["email", "password", "passwordCheck"],
-  };
-
-  // Declare a mapping between action ids and their implementations
-  myValidators = {
-    "/passwordCheck": (value, property, form) => {
-      const passwordProperty = formProperty.findRoot().getProperty("password");
-      if (
-        passwordProperty.value !== undefined &&
-        property.valid &&
-        value !== passwordProperty.value
-      ) {
-        return { passwordCheck: { expectedValue: "same as 'password'" } };
-      }
-      return null;
-    },
-  };
-}
-```
-
-### Custom Bindings
-
-Some form field may require a reaction to other forms fields when getting some input.
-The Form component accepts a `bindings` input bound to a map of field paths mapped to event and binding functions.  
-The binding function takes two arguments: the native event, and the property corresponding to it.
-
-The following example creates a form where you will fill in some data for a family.
-When you type in the name of the parent (first person) the name of the children will be kept updated.
-
-```js
-@Component({
-  selector: "minimal-app",
-  // Bind the bindings map to the the "bindings" input
-  template:
-    '<sf-form [schema]="mySchema" [bindings]="myFieldBindings"></sf-form>',
-})
-export class AppComponent {
-  mySchema = {
-    type: "object",
-    title: "Example with custom bindings.",
-    description:
-      "Type a family name to see how the name gets synchronized with the children.",
-    properties: {
-      name: {
-        type: "string",
-        title: "Surname",
-      },
-      forename: {
-        type: "string",
-        title: "Forename",
-      },
-      children: {
-        type: "array",
-        title: "Family",
-        items: {
-          type: "object",
-          title: "Children",
-          properties: {
-            name: {
-              type: "string",
-              title: "Surname",
-            },
-            forename: {
-              type: "string",
-              title: "forename",
-            },
-            age: {
-              type: "number",
-              title: "age",
-            },
-          },
-        },
-      },
-    },
-  };
-
-  // Declare a mapping between field and event-id
-  myFieldBindings = {
-    "/name": [
-      {
-        input: (event, formProperty: FormProperty) => {
-          const parent: PropertyGroup = formProperty.findRoot();
-
-          /**
-           * Set the input value for the children
-           */
-          const child1: FormProperty = parent.getProperty("children/0/name");
-
-          child1.setValue(formProperty.value, false);
-
-          const child2: FormProperty = parent.getProperty("children/1/name");
-          child2.setValue(event.target.value, false);
-
-          /**
-           * Get the input value for all the children
-           */
-          for (const objectProperty of parent.getProperty("children")
-            .properties) {
-            console.log(
-              "Value for child ",
-              objectProperty,
-              objectProperty.properties["name"].value
-            );
-          }
-        },
-      },
-    ],
-  };
-}
-```
-
-### Conditional fields
-
-It is possible to make the presence of a field depends on another field's value.  
-To achieve this you just have to add a `visibleIf` property to a field's definition.
-
-**Value**  
-The value to match is set as array item.  
-Setting multiple items will make the visiblity condition `true` if one of the values matches.  
-If it is required to match all values head over to the section `visibleIf` with `allOf` condition.
-
-**$ANY$**  
-Adding the value `$ANY$` to the array of conditional values, will make the field visible for any value inserted.
-
-```js
-@Component({
-  selector: "minimal-app",
-  template: '<sf-form [schema]="mySchema"></sf-form>',
-})
-export class AppComponent {
-  mySchema = {
-    properties: {
-      name: {
-        type: "string",
-        description: "Username",
-      },
-      comment: {
-        type: "string",
-        description: "Comment",
-      },
-      registerNewsletter: {
-        type: "boolean",
-        description: "I want to receive the newsletter",
-        default: false,
-        visibleIf: {
-          comment: ["$ANY$"],
-        },
-      },
-      registerEmail: {
-        type: "string",
-        description: "Email",
-        format: "email",
-        // Declare that this field must be displayed only if registerNewsletter is true
-        visibleIf: {
-          registerNewsletter: [true],
-        },
-      },
-    },
-    required: ["name", "comment", "registerToNewsletter"],
-  };
-}
-```
-
-**$EMPTY$**  
-Assigning an empty Object to 'visibleIf' is interpreted as _visibleIf_ nothing, thereby the widget is hidden and not present in model.
-
-```js
-mySchema = {
-  properties: {
-    hidden: {
-      type: "boolean",
-      visibleIf: {},
-    },
-  },
-};
-```
-
-`visibleIf` may also declare conditional binding by using `oneOf` or `allOf` properties.
-Where `oneOf` is handled as `OR` and `allOf` is handled as `AND`.
-
-```
-  "visibleIf": {
-        "allOf": [
-          {
-            "forename": [
-              "$ANY$"
-            ]
-          },
-          {
-            "name": [
-              "$ANY$"
-            ]
-          }
-        ]
-      }
-```
-
-The `oneOf` a is prioritized before the `allOf` and both are prioritized before the
-property binding.
-
-_`oneOf` and `allOf` oneOf and allOf are reserved keywords and not suitable as property names_
-
-**Arrays**
-
-To address array items or not yet existing properties the `visibleIf`
-condition path may contain wildcard `*`.
-
-e.g
-
-```
-  "visibleIf": {
-        "oneOf": [
-          {
-            "/person/*/age": [
-              "18"
-            ]
-          }
-        ]
-      }
-```
-
-To address a specific item the `visibleIf`
-condition path should contain the index position.
-
-e.g
-
-```
-  "visibleIf": {
-        "oneOf": [
-          {
-            "/person/1/age": [
-              "18"
-            ]
-          }
-        ]
-      }
-```
-
-**Expressions**
-
-Expressions allow a more complex `visibleIf` condition related to the involded fields.  
-To use an expression the value of the item  
-in the conditional array must start with `$EXP$`.  
-When processing the expression a context is available containing  
-a `source` and a `target` object.  
-Where `source` is the `FormProperty` that has the `visibleIf` condition defined  
-and `target` is the `FormProperty` that has been defined by the `path`.
-
-```
-  "myField" : { // SOURCE
-    "visibleIf": {
-          "oneOf": [
-            {
-              "/person/1/age": // TARGET
-              [
-                "$EXP$ target.value < 18"
-              ]
-            }
-          ]
-        }
-   }
-```
-
-#### Hidden fields
-
-When a field has been made invisible by the condition `visibleIf`
-then the property of the invisible field will be missing in the result model.
-
-If there is need to submit default values that are not visible for the form
-the `widget.id` `hidden` might be the better choice
-
-```js
-  mySchema = {
-    "properties": {
-      "hiddenInput": {
-        "type": "boolean",
-        "widget": "hidden",
-        "default": true
-      },
-      "lastName": {
-        "type": "string",
-        ...
-      }
-    }
-  }
-```
-
-so the value of the hidden field will be bound to the output model
-
-```js
-  {
-    "hiddenInput": true,
-    "lastName": "Doe",
-    ...
-  }
-```
-
-### Fields presentation and ordering
-
-As a JSON object is an unordered collection you can't be sure your fields will be correctly ordered when the form is built.
-The `order` and `fieldsets` entries of the schema are here to organize your fields.
-
-#### Ordering
-
-The `order` entry is an array listing all the fields ids in the order they must appear in the form:
-
-```js
-{
-  "properties": {
-    "firstName": {"type": "string","description": "First name"},
-    "lastName": {"type": "string","description": "Last name"},
-    "email": {"type": "string","description": "Email"}
-  },
-  "order": ["firstName", "lastName", "email"]
-}
-```
-
-#### Fieldsets
-
-With the `fieldsets` property, you can describe the different parts of the form and the fields they contain:
-
-```js
-{
-  "properties": {
-    "firstName": {
-      "type": "string",
-      "description": "First name"
-    },
-    "lastName": {
-      "type": "string",
-      "description": "Last name"
-    },
-    "email": {
-      "type": "string",
-      "description": "Email"
-    },
-    "notificationsFrequency": {
-      "type": "string",
-      "description": "Notifications frequency",
-      "widget": "select",
-      "oneOf": [
-        {
-          "description": "Daily",
-          "enum": [
-            "daily"
-          ]
-        },
-        {
-          "description": "Weekly",
-          "enum": [
-            "weekly"
-          ]
-        },
-        {
-          "description": "Monthly",
-          "enum": [
-            "monthly"
-          ]
-        }
-      ],
-      "default": "daily"
-    }
-  },
-  "fieldsets": [
-    {
-      "title": "Personal information",
-      "fields": [
-        "firstName",
-        "lastName",
-        "email"
-      ]
-    },
-    {
-      "title": "Account settings",
-      "fields": [
-        "notificationsFrequency"
-      ]
-    }
-  ]
-}
-```
-
-The `title` entry of each fieldset is optional.
-
-## Fixing the schema or model before rendering
-
-Sometimes your schema (or model) is provided by a backend you cannot control.
-If it is not formatted the way Angular 2 Schema Form expects or if some elements are missing (for instance the fieldsets, some widgets, etc.), you can fix it very easily in your component:
-
-```javascript
-@Component({
-  selector: 'plone-view-edit',
-  template: '<sf-form [schema]="schema" [model]="model" [actions]="actions"></sf-form>'
-})
-export class MyComponent {
-  private schema: any = {
-    'properties': {}
-  };
-  private actions: any = {};
-  private model: any = {};
-
-  constructor(private http: Http) { }
-
-  ngOnInit() {
-    this.http.get('http://mybackend/schema').subscribe(res => {
-      let schema = res.json();
-
-      // FIXES
-      // the "description" field must be rendered with tinymce
-      schema.properties.description.widget = 'tinymce'
-
-      // the "publication" field is required
-      schema.required = ['publication'];
-
-      this.schema = schema;
-    });
-  }
-}
-```
-
-## Creating a custom widget
-
-Ngx schema form allows you to create your own widget.
-
-Note: Currently this feature is not completely defined and the API might change.
-
-You need to derivate the widget you want to customize:
-
-```javascript
-@Component({
-  selector: "mdl-sf-string-widget",
-  templateUrl: "./string.widget.html",
-})
-export class MyStringWidget extends StringWidget {}
-```
-
-You need to provide its html template (let's imagine we want to use the Material Design text field):
-
-```html
-<mdl-textfield
-  [label]="schema.description"
-  type="string"
-  floating-label
-  [name]="name"
-  [attr.readonly]="schema.readOnly?true:null"
-  [attr.id]="id"
-  [attr.disabled]="schema.readOnly?true:null"
-  [formControl]="control"
-></mdl-textfield>
-```
-
-And you need to declare it in a custom registry:
-
-```javascript
-import { MyStringWidget } from "./mystring";
-
-export class MyWidgetRegistry extends DefaultWidgetRegistry {
-  constructor() {
-    super();
-
-    this.register("string", MyStringWidget);
-  }
-}
-```
-
-And, in your module, you need to:
-
-- declare your widget component (like any regular component),
-- declare it as an entry components (it means it can be instanciated dynamically),
-- and provide your registry.
-
-```javascript
-declarations: [MyStringWidget],
-entryComponents: [MyStringWidget],
-providers: [{provide: WidgetRegistry, useClass: MyWidgetRegistry}],
-```
-
-Note: you will also need to import `ReactiveFormsModule` if you want to be able to use form control:
-
-```javascript
-import { ReactiveFormsModule } from '@angular/forms';
-...
-@NgModule({
-  ...
+  declarations: [ AppComponent ],
   imports: [
-    ...
-    ReactiveFormsModule,
-  ]
+    MaterialDesignFrameworkModule
+  ],
+  providers: [],
+  bootstrap: [ AppComponent ]
 })
+export class AppModule { }
 ```
 
-## Create form from html instead of json schema
+Four framework modules are currently included, the import is the same as above :
 
-Ngx schema form allows you to create forms from angular html templates too.
-For this you only need to import `TemplateSchemaModule` to your app, and use the
-directive `templateSchema` on sf-form.
+* MaterialDesignFrameworkModule from @ajsf/material — Material Design
+* Bootstrap3FrameworkModule from @ajsf/bootstrap3 — Bootstrap 3
+* Bootstrap4FrameworkModule from @ajsf/bootstrap4 — Bootstrap 4
+* JsonSchemaFormModule from @ajsf/core — plain HTML (for testing)
 
-The followin html will generate the same form as the json schema in getting started section.
+It is also possible to load multiple frameworks and switch between them at runtime, like the example playground on GitHub. But most typical sites will just load one framework.
+
+### To install from GitHub
+
+To install [the library and the example playground from GitHub](https://github.com/hamzahamidi/ajsf), clone `https://github.com/hamzahamidi/ajsf.git` with your favorite git program. Or, assuming you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Node/YARN](https://nodejs.org/en/download/) installed, enter the following in your terminal:
+
+```shell
+git clone https://github.com/hamzahamidi/ajsf.git ajsf
+cd ajsf
+yarn install
+yarn start
+```
+
+This should start a server with the example playground, which you can view in your browser at `http://localhost:4200`
+
+The source code is composed as the following:
+
+* `projects/ajsf-core` - Angular JSON Schema Form main library
+* `projects/ajsf-bootstrap3` - Framework for Bootstrap 3
+* `projects/ajsf-bootstrap4` - Framework for Bootstrap 4
+* `projects/ajsf-material` - Framework for Angular Material
+* `projects/ajsf-core/src/lib/framework-library` - framework library
+* `projects/ajsf-core/src/lib/widget-library` - widget library
+* `projects/ajsf-core/src/lib/shared` - various utilities and helper functions
+* `demo` - the demonstration playground example application
+* `demo/assets/example-schemas` - JSON Schema examples used in the playground
+
+If you want detailed documentation describing the individual functions used in this library, check the README in each component. (Angular JSON Schema Form is still a work in progress, so right now this documentation varies from highly detailed to completely missing.)
+
+## Using Angular JSON Schema Form
+
+### Basic use
+
+For basic use, after loading JsonSchemaFormModule as described above, to display a form in your Angular component, simply add the following to your component's template:
 
 ```html
-<sf-form [(ngModel)]="model" templateSchema>
-  <sf-field name="email" format="email" [required]="true"> Email </sf-field>
-  <sf-field name="password" widget="password" [required]="true">
-    Password
-  </sf-field>
-  <sf-field name="rememberMe" type="boolean"> Remember Me </sf-field>
-</sf-form>
+<json-schema-form
+  loadExternalAssets="true"
+  [schema]="yourJsonSchema"
+  framework="no-framework"
+  (onSubmit)="yourOnSubmitFn($event)">
+</json-schema-form>
 ```
 
-For more details see example app.
+Where `schema` is a valid JSON schema object, and `onSubmit` calls a function to process the submitted JSON form data. If you don't already have your own schemas, you can find a bunch of samples to test with in the `demo/assets/example-schemas` folder, as described above.
 
-## Development and build
+`framework` is for the template you want to use, the default value is `no-framwork`. The possible values are:
 
-To work on this package:
+* `material-design` for  Material Design.
+* `bootstrap-3` for Bootstrap 3.
+* `bootstrap-4` for 'Bootstrap 4.
+* `no-framework` for (plain HTML).
 
-```bash
-npm install
+Setting `loadExternalAssets="true"` will automatically load any additional assets needed by the display framework. It is useful when you are trying out this library, but production sites should instead load all required assets separately. For full details see 'Changing or adding frameworks', below.
+
+### Data-only mode
+
+Angular JSON Schema Form can also create a form entirely from a JSON object—with no schema—like so:
+
+```html
+<json-schema-form
+  loadExternalAssets="true"
+  [(ngModel)]="exampleJsonObject">
+</json-schema-form>
 ```
 
-Then you can build:
-
-```bash
-npm run build:lib
+```javascript
+exampleJsonObject = {
+  "first_name": "Jane", "last_name": "Doe", "age": 25, "is_company": false,
+  "address": {
+    "street_1": "123 Main St.", "street_2": null,
+    "city": "Las Vegas", "state": "NV", "zip_code": "89123"
+  },
+  "phone_numbers": [
+    { "number": "702-123-4567", "type": "cell" },
+    { "number": "702-987-6543", "type": "work" }
+  ], "notes": ""
+};
 ```
 
-If you want to work with the demo:
+In this mode, Angular JSON Schema Form automatically generates a schema from your data. The generated schema is relatively simple, compared to what you could create on your own. However, as the above example shows, it does detect and enforce string, number, and boolean values (nulls are also assumed to be strings), and automatically allows array elements to be added, removed, and reordered.
 
-```bash
-npm install -g @angular/cli
-npm install
-ng build schema-form
-npm start
+After displaying a form in this mode, you can also use the `formSchema` and `formLayout` outputs (described in 'Debugging inputs and outputs', below), to return the generated schema and layout, which will give you a head start on writing your own schemas and layouts by showing you examples created from your own data.
+
+Also, notice that the 'ngModel' input supports Angular's 2-way data binding, just like other form controls, which is why it is not always necessary to use an onSubmit function.
+
+### Advanced use
+
+#### Additional inputs an outputs
+
+For more control over your form, you may provide these additional inputs:
+
+* `layout` array with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
+* `data` object to populate the form with default or previously submitted values
+* `options` object to set any global options for the form
+* `widgets` object to add custom widgets
+* `language` string to set the error message language (currently supports 'de', 'en', 'es', 'fr', 'it', 'pt', 'zh')
+* `framework` string or object to set which framework to use
+
+For `framework`, you can pass in your own custom framework object, or, if you've loaded multiple frameworks, you can specify the name of the framework you want to use. To switch between the included frameworks, use 'material-design', 'bootstrap-3', 'bootstrap-4', and 'no-framework'.
+
+If you want more detailed output, you may provide additional functions for `onChanges` to read the values in real time as the form is being filled out, and you may implement your own custom validation indicators from the boolean `isValid` or the detailed `validationErrors` outputs.
+
+Here is an example:
+
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  [layout]="yourJsonFormLayout"
+  [(data)]="yourData"
+  [options]="yourFormOptions"
+  [widgets]="yourCustomWidgets"
+  language="fr"
+  framework="material-design"
+  loadExternalAssets="true"
+  (onChanges)="yourOnChangesFn($event)"
+  (onSubmit)="yourOnSubmitFn($event)"
+  (isValid)="yourIsValidFn($event)"
+  (validationErrors)="yourValidationErrorsFn($event)">
+</json-schema-form>
 ```
 
-## Building the API documentation
+Note: If you prefer brackets around all your attributes, the following is functionally equivalent:
 
-You can build an HTML version of the API documentation by running the following command:
-
-```bash
-npm run typedoc
+```html
+<json-schema-form
+[schema]="yourJsonSchema"
+[layout]="yourJsonFormLayout"
+[(data)]="yourData"
+[options]="yourFormOptions"
+[widgets]="yourCustomWidgets"
+[language]="'fr'"
+[framework]="'material-design'"
+[loadExternalAssets]="true"
+(onChanges)="yourOnChangesFn($event)"
+(onSubmit)="yourOnSubmitFn($event)"
+(isValid)="yourIsValidFn($event)"
+(validationErrors)="yourValidationErrorsFn($event)">
+</json-schema-form>
 ```
 
-The api is then available in the "doc" directory.
+If you use this syntax, make sure to include the nested quotes (`"'` and `'"`) around the language and framework names. (If you leave out the inner quotes, Angular will read them as a variable names, rather than strings, which will cause errors. All un-bracketed attributes, however, are automatically read as strings, so they don't need inner quotes.)
+
+#### Single-input mode
+
+You may also combine all your inputs into one compound object and include it as a `form` input, like so:
+
+```javascript
+const yourCompoundInputObject = {
+  schema:    { ... },  // REQUIRED
+  layout:    [ ... ],  // optional
+  data:      { ... },  // optional
+  options:   { ... },  // optional
+  widgets:   { ... },  // optional
+  language:   '...' ,  // optional
+  framework:  '...'    // (or { ... }) optional
+}
+```
+
+```html
+<json-schema-form
+  [form]="yourCompoundInputObject"
+  (onSubmit)="yourOnSubmitFn($event)">
+</json-schema-form>
+```
+
+You can also mix these two styles depending on your needs. In the example playground, all examples use the combined `form` input for `schema`, `layout`, and `data`, which enables each example to control those three inputs, but the playground uses separate inputs for `language` and `framework`, enabling it to change those settings independent of the example.
+
+Combining inputs is useful if you have many unique forms and store each form's data and schema together. If you have one form (or many identical forms), it will likely be more useful to use separate inputs for your data and schema. Though even in that case, if you use a custom layout, you could store your schema and layout together and use one input for both.
+
+#### Compatibility modes
+
+If you have previously used another JSON form creation library—Angular Schema Form (for AngularJS), React JSON Schema Form, or JSON Form (for jQuery)—in order to make the transition easier, Angular JSON Schema Form will recognize the input names and custom input objects used by those libraries. It should automatically work with JSON Schemas in [version 6](http://json-schema.org/draft-06/schema), [version 4](http://json-schema.org/draft-04/schema), [version 3](http://json-schema.org/draft-03/schema), or the [truncated version 3 format supported by JSON Form](https://github.com/joshfire/jsonform/wiki#schema-shortcut). So the following will all work:
+
+Angular Schema Form (AngularJS) compatibility:
+
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  [form]="yourAngularSchemaFormLayout"
+  [(model)]="yourData">
+</json-schema-form>
+```
+
+React JSON Schema Form compatibility:
+
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  [UISchema]="yourReactJsonSchemaFormUISchema"
+  [(formData)]="yourData">
+</json-schema-form>
+```
+
+JSON Form (jQuery) compatibility:
+
+```html
+<json-schema-form
+  [form]="{
+    schema: yourJsonSchema,
+    form: yourJsonFormLayout,
+    customFormItems: yourJsonFormCustomFormItems,
+    value: yourData
+  }">
+</json-schema-form>
+```
+
+Note: 2-way data binding will work with any dedicated data input, including 'data', 'model', 'ngModel', or 'formData'. However, 2-way binding will _not_ work with the combined 'form' input.
+
+#### Debugging inputs and outputs
+
+Finally, Angular JSON Schema Form includes some additional inputs and outputs for debugging:
+
+* `debug` input — Activates debugging mode.
+* `loadExternalAssets` input — Causes external JavaScript and CSS needed by the selected framework to be automatically loaded from a CDN (this is not 100% reliable, so while this can be helpful during development and testing, it is not recommended for production)—Note: If you are using this mode and get a console error saying an external asset has not loaded (such as jQuery, required for Bootstrap 3) simply reloading your web browser will usually fix it.
+* `formSchema` and `formLayout` outputs — Returns the final schema and layout used to create the form (which will either show how your original input schema and layout were modified, if you provided inputs, or show you the automatically generated ones, if you didn't).
+
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  [debug]="true"
+  loadExternalAssets="true"
+  (formSchema)="showFormSchemaFn($event)"
+  (formLayout)="showFormLayoutFn($event)">
+</json-schema-form>
+```
+
+## Customizing
+
+In addition to a large number of user-settable options, Angular JSON Schema Form also has the ability to load custom form control widgets and layout frameworks. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. The default framework library includes templates to style forms using Material Design, Bootstrap 3, or Bootstrap 4 (or plain HTML with no formatting, which is not useful in production, but can be helpful for development and debugging).
+
+### User settings
+
+(TODO: List all available user settings, and configuration options for each.)
+
+### Creating custom input validation error messages
+
+You can easily add your own custom input validation error messages, either for individual control widgets, or for your entire form.
+
+#### Setting error messages for individual controls or the entire form
+
+To set messages for individual form controls, add them to that control's node in the form layout, like this:
+
+```javascript
+const yourFormLayout = [
+  { key: 'name',
+    title: 'Enter your name',
+    validationMessages: {
+      // Put your error messages for the 'name' field here
+    }
+  },
+  { type: 'submit', title: 'Submit' }
+]
+```
+
+To set messages for the entire form, add them to the form options, inside the defautWidgetOptions validationMessages object, like this:
+
+```javascript
+const yourFormOptions = {
+  defautWidgetOptions: {
+    validationMessages: {
+      // Put your error messages for the entire form here
+    }
+  }
+}
+```
+
+#### How to format error messages
+
+The validationMessages object—in either a layout node or the form options—contains the names of each error message you want to set as keys, and the corresponding messages as values. Messages may be in any of the following formats:
+
+* String: A plain text message, which is always the same.
+* String template: A text message that includes Angular template-style {{variables}}, which will be be replaced with values from the returned error object.
+* Function: A JavaScript function which accepts the error object as input, and returns a string error message.
+
+Here are examples of all three error message types:
+
+```javascript
+validationMessages: {
+
+  // String error message
+  required: 'This field is required.',
+
+  // String template error message
+  // - minimumLength variable will be replaced
+  minLength: 'Must be at least {{minimumLength}} characters long.',
+
+  // Function error message
+  // - example error object:   { multipleOfValue: 0.01, currentValue: 3.456 }
+  // - resulting error message: 'Must have 2 or fewer decimal places.'
+  multipleOf: function(error) {
+    if ((1 / error.multipleOfValue) % 10 === 0) {
+      const decimals = Math.log10(1 / error.multipleOfValue);
+      return `Must have ${decimals} or fewer decimal places.`;
+    } else {
+      return `Must be a multiple of ${error.multipleOfValue}.`;
+    }
+  }
+}
+```
+
+(Note: These examples are from the default set of built-in error messages, which includes messages for all JSON Schema errors except type, const, enum, and dependencies.)
+
+#### Available input validation errors and object values
+
+Here is a list of all the built-in JSON Schema errors, which data type each error is available for, and the values in their returned error objects:
+
+Error name       | Data type | Returned error object values
+-----------------|-----------|-----------------------------------------
+required         |  any      | (none)
+type             |  any      | requiredType,          currentValue
+const            |  any      | requiredValue,         currentValue
+enum             |  any      | allowedValues,         currentValue
+minLength        |  string   | minimumLength,         currentLength
+maxLength        |  string   | maximumLength,         currentLength
+pattern          |  string   | requiredPattern,       currentValue
+format           |  string   | requiredFormat,        currentValue
+minimum          |  number   | minimumValue,          currentValue
+exclusiveMinimum |  number   | exclusiveMinimumValue, currentValue
+maximum          |  number   | maximumValue,          currentValue
+exclusiveMaximum |  number   | exclusiveMaximumValue, currentValue
+multipleOf       |  number   | multipleOfValue,       currentValue
+minProperties    |  object   | minimumProperties,     currentProperties
+maxProperties    |  object   | maximumProperties,     currentProperties
+ dependencies  * |  object   | (varies, based on dependencies schema)
+minItems         |  array    | minimumItems,          currentItems
+maxItems         |  array    | maximumItems,          currentItems
+uniqueItems      |  array    | duplicateItems
+ contains      * |  array    | requiredItem
+
+* Note: The `contains` and `dependencies` validators are still in development, and do not yet work correctly.
+
+### Changing or adding widgets
+
+To add a new widget or override an existing widget, either add an object containing your new widgets to the `widgets` input of the `<json-schema-form>` tag, or load the `WidgetLibraryService` and call `registerWidget(widgetType, widgetComponent)`, with a string type name and an Angular component to be used whenever a form needs that widget type.
+
+Example:
+
+```javascript
+import { YourInputWidgetComponent } from './your-input-widget.component';
+import { YourCustomWidgetComponent } from './your-custom-widget.component';
+...
+const yourNewWidgets = {
+  input: YourInputWidgetComponent,          // Replace existing 'input' widget
+  custom-control: YourCustomWidgetComponent // Add new 'custom-control' widget
+}
+```
+
+...and...
+
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  [widgets]="yourNewWidgets">
+</json-schema-form>
+```
+
+...or...
+
+```javascript
+import { WidgetLibraryService } from '@ajsf/core';
+...
+constructor(private widgetLibrary: WidgetLibraryService) { }
+...
+// Replace existing 'input' widget:
+widgetLibrary.registerWidget('input', YourInputWidgetComponent);
+// Add new 'custom-control' widget:
+widgetLibrary.registerWidget('custom-control', YourCustomWidgetComponent);
+```
+
+To see many examples of widgets, explore the source code, or call `getAllWidgets()` from the `WidgetLibraryService` to see all widgets currently available in the library. All default widget components are in the `projects/json-schema-form/src/lib/widget-library` folder, and all custom Material Design widget components are in the `projects/json-schema-form/src/lib/framework-library/material-design-framework` folder. (The Bootstrap 3 and Bootstrap 4 frameworks just reformat the default widgets, and so do not include any custom widgets of their own.)
+
+### Changing or adding frameworks
+
+To change the active framework, either use the `framework` input of the `<json-schema-form>` tag, or load the `FrameworkLibraryService` and call `setFramework(yourCustomFramework)`, with either the name of an available framework ('bootstrap-3', 'bootstrap-4', 'material-design', or 'no-framework'), or with your own custom framework object, like so:
+
+```javascript
+import { YourFrameworkComponent } from './your-framework.component';
+import { YourWidgetComponent } from './your-widget.component';
+...
+const yourCustomFramework = {
+  framework: YourFrameworkComponent,                                // required
+  widgets:     { 'your-widget-name': YourWidgetComponent,   ... },  // optional
+  stylesheets: [ '//url-to-framework-external-style-sheet', ... ],  // optional
+  scripts:     [ '//url-to-framework-external-script',      ... ]   // optional
+}
+```
+
+...and...
+
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  [framework]="yourCustomFramework">
+</json-schema-form>
+```
+
+...or...
+
+```javascript
+import { FrameworkLibraryService } from '@ajsf/core';
+...
+constructor(private frameworkLibrary: FrameworkLibraryService) { }
+...
+frameworkLibrary.setFramework(yourCustomFramework);
+```
+
+The value of the required `framework` key is an Angular component which will be called to format each widget before it is displayed. The optional `widgets` object contains any custom widgets, which will override or supplement the built-in widgets. And the optional `stylesheets` and `scripts` arrays contain URLs to any additional external style sheets or JavaScript libraries required by the framework. These are the external stylesheets and scripts that will be loaded if the "loadExternalAssets" option is set to "true".
+
+#### Loading external assets required by a framework
+
+Most Web layout framework libraries (including both Bootstrap and Material Design) need additional external JavaScript and/or CSS assets loaded in order to work properly. The best practice is to load these assets separately in your site, before calling Angular JSON Schema Form. (For the included libraries, follow these links for more information about how to do this: [Bootstrap](http://getbootstrap.com/getting-started/) and [Material Design](https://github.com/angular/material2/blob/master/GETTING_STARTED.md).)
+
+Alternately, during development, you may find it helpful to let Angular JSON Schema Form load these resources for you (as wed did in the 'Basic use' example, above), which you can do in several ways:
+
+* Call `setFramework` with a second parameter of `true` (e.g. `setFramework('material-design', true)`), or
+* Add `loadExternalAssets: true` to your `options` object, or
+* Add `loadExternalAssets="true"` to your `<json-schema-form>` tag, as shown above
+
+Finally, if you want to see what scripts a particular framework will automatically load, after setting that framework you can call `getFrameworkStylesheets()` or `getFrameworkScritps()` from the `FrameworkLibraryService` to return the built-in arrays of URLs.
+
+However, if you are creating a production site you should load these assets separately, and make sure to remove all references to `loadExternalAssets` to prevent the assets from being loaded twice.
+
+## contributing guide
+
+If you like this project and want to contribute you can check this [documentation](./CONTRIBUTING.md).
+
+## License
+
+[MIT](/LICENSE)
