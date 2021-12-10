@@ -59,8 +59,82 @@
             }
           }
         }
+      },
+      "multipleRow": {
+        "type": "boolean",
+        "description": "Display the button for more than one item selected within a grid"
+      },
+      "messages": {
+        "type": "array",
+        "description": "Configuration of the messages to be displayed",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "The unique identifier of the message"
+            },
+            "content": {
+              "type": "string",
+              "description": "To specify the content to display"
+            },
+            "step": {
+              "type": "string",
+              "description": "Display message before or after executing the action process",
+              "enum": ["beforeExecute", "afterExecute"]
+            },
+            "type": {
+              "type": "string",
+              "description": "Message type to display",
+              "enum": ["Success", "Error", "Warning", "Info", "Confirmation"]
+            }
+          }
+        }
+      },
+      "template": {
+        "type": "string",
+        "description": "Template of the button",
+        "enum": [
+          "empty",
+          "create",
+          "save",
+          "select",
+          "apply",
+          "cancel",
+          "edit",
+          "search",
+          "edit-item",
+          "view-item",
+          "delete-item",
+          "delete-items",
+          "save-items",
+          "export",
+          "run-lifecycle",
+          "refresh"
+        ]
+      },
+      "additionalAttributes": {
+        "type": "array",
+        "description": "Component additional attributes",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["static", "variable"],
+              "default": "static"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        }
       }
-    }
+    },
+    "required": ["template"]
   },
   "layout": [
     {
@@ -69,7 +143,9 @@
           "type": "fieldset",
           "expandable": true,
           "title": "Web services",
-
+          "condition": {
+            "functionBody": "{if(model.template !== 'save' && model.template !== 'delete-items' && model.template !== 'export' && model.template !== 'delete-item' && model.template !== 'save-items' && model.template !== 'empty'){delete model.servicePaths;return false;}return true}"
+          },
           "items": [
             {
               "key": "servicePaths",
@@ -168,34 +244,37 @@
                   ]
                 }
               ]
-            },
-            {
-              "type": "fieldset",
-              "expandable": true,
-              "title": "Object Response Properties",
-              "condition": {
-                "functionBody": "{if(model.template !== 'save' && model.template !== 'delete-items' && model.template !== 'export' && model.template !== 'delete-item' && model.template !== 'save-items' && model.template !== 'empty'){delete model.servicePaths;return false;}return true}"
-              },
-              "items": [
-                {
-                  "key": "responseObjectProps.content",
-                  "placeholder": "Content",
-                  "title": "Content:"
-                },
-                {
-                  "key": "responseObjectProps.messagesKey",
-                  "placeholder": "Messages Key",
-                  "title": "Messages Key :"
-                },
-                {
-                  "key": "responseObjectProps.updateScreenValue",
-                  "title": "Update Screen Value:"
-                }
-              ]
             }
           ]
         }
       ]
     }
-  ]
+  ],
+  "data": {
+    "servicePaths": [
+      {
+        "url": "ur1",
+        "params": [
+          {
+            "param": "param1"
+          },
+          {
+            "param": "param2"
+          },
+          {
+            "param": "param3"
+          }
+        ]
+      },
+      {
+        "url": "url2"
+      }
+    ],
+    "template": "save",
+    "additionalAttributes": [
+      {
+        "type": "static"
+      }
+    ]
+  }
 }
