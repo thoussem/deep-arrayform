@@ -1,0 +1,201 @@
+{
+  "schema": {
+    "type": "object",
+    "properties": {
+      "servicePaths": {
+        "type": "array",
+        "description": "Configuration of the REST services to call",
+        "items": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "editable": true
+            },
+            "httpMethod": {
+              "type": "string",
+              "enum": ["GET", "POST", "PUT", "DELETE"]
+            },
+            "params": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "param": {
+                    "type": "string"
+                  },
+                  "paramType": {
+                    "type": "string",
+                    "description": "The type of the web service parameter, keep it empty if you are using a swagger file, it will be automatically checked",
+                    "enum": ["Query param", "Path param"]
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["Query param", "Path param", "Field", "Static"]
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "condition": {
+              "type": "object",
+              "description": "Properties to configure a condition",
+              "properties": {
+                "expression": {
+                  "type": "string",
+                  "description": "The expression to evaluate",
+                  "evaluate": true
+                },
+                "calculationBase": {
+                  "type": "array",
+                  "description": "The list of the dependents fields used in the expression",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "layout": [
+    {
+      "items": [
+        {
+          "type": "fieldset",
+          "expandable": true,
+          "title": "Web services",
+
+          "items": [
+            {
+              "key": "servicePaths",
+              "type": "array",
+              "notitle": true,
+              "items": [
+                {
+                  "type": "div",
+                  "displayFlex": true,
+                  "flex-direction": "row",
+                  "items": [
+                    {
+                      "type": "fieldset",
+                      "expandable": true,
+                      "title": "Service Path",
+                      "items": [
+                        {
+                          "key": "servicePaths[].url",
+                          "placeholder": "url",
+                          "title": "Url",
+                          "value": "$FeatureServicesPaths"
+                        },
+                        {
+                          "key": "servicePaths[].httpMethod",
+                          "placeholder": "http Method",
+                          "title": "Http Method"
+                        },
+                        {
+                          "key": "servicePaths[].params",
+                          "type": "array",
+                          "notitle": true,
+                          "items": [
+                            {
+                              "type": "div",
+                              "displayFlex": true,
+                              "flex-direction": "row",
+                              "items": [
+                                {
+                                  "type": "fieldset",
+                                  "expandable": true,
+                                  "title": "Binding WS params",
+                                  "items": [
+                                    {
+                                      "key": "servicePaths[].params[].param",
+                                      "value": "$ServiceParameters",
+                                      "title": "WS Parameter Name",
+                                      "deps": [
+                                        "servicePaths[].url",
+                                        "servicePaths[].httpMethod"
+                                      ]
+                                    },
+                                    {
+                                      "key": "servicePaths[].params[].paramType",
+                                      "title": "WS Parameter Type"
+                                    },
+                                    {
+                                      "key": "servicePaths[].params[].type",
+                                      "title": "Value Type"
+                                    },
+                                    {
+                                      "key": "servicePaths[].params[].value",
+                                      "title": "Value"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "fieldset",
+                          "expandable": true,
+                          "title": "Condition",
+                          "items": [
+                            {
+                              "key": "servicePaths[].condition.expression",
+                              "placeholder": "expression",
+                              "title": "Expression"
+                            },
+                            {
+                              "key": "servicePaths[].condition.calculationBase",
+                              "type": "array",
+                              "autoCalculate": "$ExpressionParser",
+                              "items": [
+                                "servicePaths[].condition.calculationBase[]"
+                              ],
+                              "deps": "servicePaths[].condition.expression",
+                              "condition": {
+                                "functionBody": "{return false}"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "fieldset",
+              "expandable": true,
+              "title": "Object Response Properties",
+              "condition": {
+                "functionBody": "{if(model.template !== 'save' && model.template !== 'delete-items' && model.template !== 'export' && model.template !== 'delete-item' && model.template !== 'save-items' && model.template !== 'empty'){delete model.servicePaths;return false;}return true}"
+              },
+              "items": [
+                {
+                  "key": "responseObjectProps.content",
+                  "placeholder": "Content",
+                  "title": "Content:"
+                },
+                {
+                  "key": "responseObjectProps.messagesKey",
+                  "placeholder": "Messages Key",
+                  "title": "Messages Key :"
+                },
+                {
+                  "key": "responseObjectProps.updateScreenValue",
+                  "title": "Update Screen Value:"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
